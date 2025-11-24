@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Calculator</title>
+    <style>
+        /* General styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        /* Modal Styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .modal-content {
+            background-color: #2a2a2a;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            transform: scale(0.95);
+            animation: scaleIn 0.2s ease-out forwards;
+        }
+
+        @keyframes scaleIn {
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .modal-content p {
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+        }
+
+        .confirm-btn,
+        .cancel-btn {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .confirm-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .confirm-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .cancel-btn {
+            background-color: #555;
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background-color: #444;
+        }
+        
+        /* Form Elements */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #aaa;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: white;
+            font-size: 1rem;
+            -webkit-appearance: none;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select option {
+            background: #2a2a2a;
+            color: white;
+        }
+
+        /* Compact number input layout */
+        .number-inputs {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .number-inputs>* {
+            flex: 1;
+        }
+        
+        /* Buttons */
+        button {
+            background: #4a90e2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: #357abd;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .add-btn {
+            background: #27ae60;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .add-btn:hover {
+            background: #229954;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .remove-btn:hover {
+            background: #c0392b;
+        }
+
+        .reset-btn {
+            background: #e67e22;
+        }
+
+        .reset-btn:hover {
+            background: #d68910;
+        }
+
+        /* Item & Pair Containers */
+        .pair-container {
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .pair-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .pair-header h4 {
+            margin: 0;
+            color: #aaa;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        /* Results Section */
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #1a1a1a;
+            border-radius: 6px;
+            border: 1px solid #333;
+        }
+
+        .results h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .result-item {
+            margin: 10px 0;
+            font-size: 1.1rem;
+            color: #ccc;
+        }
+
+        .result-item span {
+            color: #4a90e2;
+            font-weight: 600;
+        }
+        
+        /* History Section Styling */
+        .history-container {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #444;
+        }
+
+        .history-container h4 {
+            margin-bottom: 10px;
+            color: #ccc;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        .history-btn {
+            background: #555;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .history-btn:hover {
+            background: #666;
+        }
+
+        .clear-history-btn {
+            background: #c0392b;
+        }
+
+        .clear-history-btn:hover {
+            background: #e74c3c;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.success {
+            background: #27ae60;
+        }
+
+        .notification.error {
+            background: #e74c3c;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 20px 15px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            button,
+            input,
+            select {
+                min-height: 44px;
+            }
+
+            .remove-btn {
+                min-height: 36px;
+            }
+        }
+
+        /* iOS Specific Styles for font size on form elements */
+        @supports (-webkit-touch-callout: none) {
+            input[type="number"],
+            input[type="text"],
+            select {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="customModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <p id="modalMessage"></p>
+            <div class="modal-buttons">
+                <button id="modalConfirmBtn" class="confirm-btn">Yes, Continue</button>
+                <button id="modalCancelBtn" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="simplePage">
+        <div class="container">
+            <div class="card">
+                <h1>Simple Calculator</h1>
+                <p class="subtitle">Add number pairs and calculate totals</p>
+
+                <div class="input-group">
+                    <label for="simpleCalcId">FSN</label>
+                    <input type="text" id="simpleCalcId" placeholder="Type the FSN (Optional)" oninput="saveState()">
+                </div>
+
+                <div id="simplePairs"></div>
+                <button class="add-btn" onclick="addSimpleNumberPair()">+ Add Number Pair</button>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="calculateSimple()">Calculate Totals</button>
+                    <button class="reset-btn" onclick="resetSimple()">Reset All</button>
+                </div>
+
+                <div id="simpleResults" class="results" style="display: none;">
+                    <h3>Results:</h3>
+                    <div class="result-item">Total Quantity: <span id="simpleTotalQuantity">0</span></div>
+                    <div class="result-item">Total Weight: <span id="simpleTotalWeight">0</span></div>
+                    <div id="simpleHistory" class="history-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let simplePairCount = 0;
+        let modalCallback = null;
+        let calculationHistory = []; // To store the last 3 calculation states
+
+        // Helper functions
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent);
+        }
+
+        function focusInputSafely(input, delay) {
+            if (!input) return;
+            delay = delay || 100;
+
+            setTimeout(function() {
+                if (isIOS()) {
+                    input.readOnly = true;
+                }
+                input.focus();
+                if (isIOS()) {
+                    input.readOnly = false;
+                    input.click();
+                }
+                input.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                const length = input.value.length;
+                if (input.setSelectionRange) {
+                    input.setSelectionRange(length, length);
+                }
+            }, delay);
+        }
+
+        function showNotification(message, type) {
+            type = type || 'success';
+            const existing = document.querySelector('.notification');
+            if (existing) {
+                existing.remove();
+            }
+
+            const notification = document.createElement('div');
+            notification.className = 'notification ' + type;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(function() {
+                notification.style.opacity = '0';
+                setTimeout(function() {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function validateQuantityInput(input) {
+            const originalValue = input.value;
+            const selectionStart = input.selectionStart;
+            const sanitizedValue = originalValue.replace(/[^\d]/g, '');
+
+            if (sanitizedValue !== originalValue) {
+                const diff = originalValue.length - sanitizedValue.length;
+                input.value = sanitizedValue;
+                input.setSelectionRange(selectionStart - diff, selectionStart - diff);
+                showNotification('Quantities must be whole numbers only', 'error');
+            }
+            saveState();
+        }
+
+        function validateWeightInput(input) {
+            const originalValue = input.value;
+            const selectionStart = input.selectionStart;
+            let sanitizedValue = originalValue.replace(/[^\d.]/g, '');
+            const parts = sanitizedValue.split('.');
+            if (parts.length > 2) {
+                sanitizedValue = parts[0] + '.' + parts.slice(1).join('');
+            }
+            if (parts.length === 2 && parts[1].length > 1) {
+                sanitizedValue = parts[0] + '.' + parts[1].substring(0, 1);
+            }
+
+            if (sanitizedValue !== originalValue) {
+                const diff = originalValue.length - sanitizedValue.length;
+                input.value = sanitizedValue;
+                input.setSelectionRange(selectionStart - diff, selectionStart - diff);
+                showNotification('Weights can only have one decimal place', 'error');
+            }
+            saveState();
+        }
+
+        function showModal(message, onConfirm) {
+            const modal = document.getElementById('customModal');
+            const messageElement = document.getElementById('modalMessage');
+            messageElement.textContent = message;
+            modal.style.display = 'flex';
+            modalCallback = onConfirm;
+
+            document.getElementById('modalConfirmBtn').onclick = function() {
+                modal.style.display = 'none';
+                if (modalCallback) modalCallback(true);
+            };
+            document.getElementById('modalCancelBtn').onclick = function() {
+                modal.style.display = 'none';
+                if (modalCallback) modalCallback(false);
+            };
+        }
+
+        // Simple Calculator Functions
+        function addSimpleNumberPair(pairData) {
+            simplePairCount++;
+            const container = document.getElementById('simplePairs');
+            const pairDiv = document.createElement('div');
+            pairDiv.className = 'pair-container';
+            pairDiv.id = 'simplePair-' + simplePairCount;
+
+            const quantityVal = pairData ? pairData.quantity : '';
+            const weightVal = pairData ? pairData.weight : '';
+
+            const quantityHTML = `<input type="text" id="simpleNum1-${simplePairCount}" value="${quantityVal}" inputmode="numeric" placeholder="Qty" oninput="validateQuantityInput(this)" onkeydown="handleSimpleEnterKey(event, ${simplePairCount}, 1)">`;
+            const weightHTML = `<input type="text" id="simpleNum2-${simplePairCount}" value="${weightVal}" inputmode="decimal" placeholder="Wt" oninput="validateWeightInput(this)" onkeydown="handleSimpleEnterKey(event, ${simplePairCount}, 2)">`;
+
+            pairDiv.innerHTML = `<div class="pair-header">
+                      <h4>Pair ${simplePairCount}</h4>
+                      <button class="remove-btn" onclick="removeSimplePair(${simplePairCount})">Remove</button>
+                  </div>
+                  <div class="number-inputs">
+                      ${quantityHTML}
+                      ${weightHTML}
+                  </div>`;
+            container.appendChild(pairDiv);
+
+            if (!pairData) {
+                const firstInput = document.getElementById('simpleNum1-' + simplePairCount);
+                focusInputSafely(firstInput, isIOS() ? 200 : 50);
+                saveState();
+            }
+        }
+
+        function removeSimplePair(pairId) {
+            const pair = document.getElementById('simplePair-' + pairId);
+            if (pair) {
+                pair.remove();
+                saveState();
+            }
+        }
+
+        function handleSimpleEnterKey(event, currentPair, currentField) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                if (currentField === 1) {
+                    const nextInput = document.getElementById('simpleNum2-' + currentPair);
+                    if (nextInput) focusInputSafely(nextInput, isIOS() ? 200 : 50);
+                } else if (currentField === 2) {
+                    addSimpleNumberPair();
+                }
+            }
+        }
+
+        function calculateSimple() {
+            addToHistory(getCurrentState());
+            let totalQuantity = 0;
+            let totalWeight = 0;
+            let hasData = false;
+
+            document.querySelectorAll('#simplePairs .pair-container').forEach(pair => {
+                const pairId = pair.id.split('-')[1];
+                const num1Input = document.getElementById('simpleNum1-' + pairId);
+                const num2Input = document.getElementById('simpleNum2-' + pairId);
+
+                if (num1Input && num1Input.value) {
+                    totalQuantity += parseInt(num1Input.value) || 0;
+                    hasData = true;
+                }
+                if (num2Input && num2Input.value) {
+                    totalWeight += parseFloat(num2Input.value) || 0;
+                    hasData = true;
+                }
+            });
+
+            if (hasData) {
+                document.getElementById('simpleTotalQuantity').textContent = totalQuantity;
+                document.getElementById('simpleTotalWeight').textContent = totalWeight.toFixed(1);
+                document.getElementById('simpleResults').style.display = 'block';
+                showNotification('Calculation completed', 'success');
+                document.getElementById('simpleResults').scrollIntoView({
+                    behavior: 'smooth'
+                });
+                renderHistoryControls();
+            } else {
+                showNotification('Please add some data first', 'error');
+            }
+        }
+
+        function resetSimple() {
+            if (document.querySelectorAll('#simplePairs .pair-container').length > 0) {
+                showModal('This will clear all inputs. Continue?', function(isConfirmed) {
+                    if (isConfirmed) {
+                        document.getElementById('simplePairs').innerHTML = '';
+                        document.getElementById('simpleCalcId').value = '';
+                        simplePairCount = 0;
+                        addSimpleNumberPair();
+                        document.getElementById('simpleTotalQuantity').textContent = '0';
+                        document.getElementById('simpleTotalWeight').textContent = '0';
+                        renderHistoryControls();
+                        document.getElementById('simpleResults').style.display = calculationHistory.length > 0 ? 'block' : 'none';
+                        showNotification('Inputs cleared', 'success');
+                    }
+                });
+            } else {
+                showNotification('Calculator already reset', 'error');
+            }
+        }
+
+        // State Management & History
+        function getCurrentState() {
+            const state = {
+                id: document.getElementById('simpleCalcId').value,
+                pairs: [],
+                history: calculationHistory
+            };
+            document.querySelectorAll('#simplePairs .pair-container').forEach(pair => {
+                const pairId = pair.id.split('-')[1];
+                const quantity = document.getElementById(`simpleNum1-${pairId}`).value;
+                const weight = document.getElementById(`simpleNum2-${pairId}`).value;
+                state.pairs.push({
+                    quantity,
+                    weight
+                });
+            });
+            return state;
+        }
+
+        function saveState() {
+            localStorage.setItem('simpleCalculatorState', JSON.stringify(getCurrentState()));
+        }
+
+        function renderState(state) {
+            document.getElementById('simplePairs').innerHTML = '';
+            simplePairCount = 0;
+            document.getElementById('simpleCalcId').value = state.id || '';
+            if (state.pairs && state.pairs.length > 0) {
+                state.pairs.forEach(pair => addSimpleNumberPair(pair));
+            } else {
+                addSimpleNumberPair();
+            }
+            calculationHistory = state.history || [];
+            renderHistoryControls();
+            if (calculationHistory.length > 0) {
+                document.getElementById('simpleResults').style.display = 'block';
+            }
+        }
+
+        function loadState() {
+            const savedState = localStorage.getItem('simpleCalculatorState');
+            if (savedState) {
+                try {
+                    renderState(JSON.parse(savedState));
+                    showNotification('Previous session restored', 'success');
+                } catch (e) {
+                    console.error("Failed to parse saved state:", e);
+                    addSimpleNumberPair();
+                }
+            } else {
+                addSimpleNumberPair();
+            }
+        }
+
+        function addToHistory(state) {
+            calculationHistory.unshift({ ...state,
+                history: undefined
+            });
+            if (calculationHistory.length > 3) calculationHistory.pop();
+            saveState();
+        }
+
+        function loadFromHistory(index) {
+            const state = calculationHistory[index];
+            if (state) {
+                renderState(state);
+                showNotification(`Loaded calculation "${state.id || `FSN ${index + 1}`}"`, 'success');
+            }
+        }
+
+        function clearHistory() {
+            showModal('This will permanently delete all saved calculations. Continue?', function(isConfirmed) {
+                if (isConfirmed) {
+                    calculationHistory = [];
+                    saveState();
+                    renderHistoryControls();
+                    document.getElementById('simpleResults').style.display = 'none';
+                    showNotification('Calculation history cleared', 'success');
+                }
+            });
+        }
+
+        function renderHistoryControls() {
+            const container = document.getElementById('simpleHistory');
+            container.innerHTML = '';
+            if (calculationHistory.length > 0) {
+                container.innerHTML = '<h4>Calculation History:</h4>';
+                calculationHistory.forEach((state, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'history-btn';
+                    btn.textContent = `Load "${state.id || `FSN ${index + 1}`}"`;
+                    btn.onclick = () => loadFromHistory(index);
+                    container.appendChild(btn);
+                });
+                const clearBtn = document.createElement('button');
+                clearBtn.className = 'history-btn clear-history-btn';
+                clearBtn.textContent = 'Clear History';
+                clearBtn.onclick = clearHistory;
+                container.appendChild(clearBtn);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadState);
+    </script>
+</body>
+</html>
